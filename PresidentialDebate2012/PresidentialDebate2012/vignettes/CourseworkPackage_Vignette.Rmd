@@ -1,0 +1,178 @@
+---
+title: "PresidentialDebates2012_Vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{PresidentialDebates2012_Vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+author: 10556321, 10557769
+date: "08/01/2020"
+
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  fig.width=9,
+  fig.height=6
+)
+```
+
+```{r setup, include=FALSE}
+library(PresidentialDebate2012)
+library(tidytext)
+library(dplyr)
+library(purrr)
+library(ggplot2)
+library(ggthemes)
+```
+
+This package is based around transcripts from the 2012 US Presidential debates, in particular the televised debates that were hosted by the Commision on Presidential Debates. 
+
+The package contains 2 data sets:  
+*debate_data*  
+*word_percentage_data*  
+  
+And one function:  
+*word_usage*  
+
+Lets start with an overview of these 3 components.
+
+# Overview of components
+## debate_data
+
+This is the transcript data from the debates its structure is as follows:
+```{r}
+require(PresidentialDebate2012)
+head(PresidentialDebate2012::debate_data)
+```
+#### Person
+The person speaking, the people are:  
+* OBAMA - Barack Obama, the sitting President (Democratic Party).  
+* ROMNEY - Mitt Romney, the Repulican Presidential candidate.  
+* LEHRER - Jim Lehrer, the moderator of the first debate.  
+* CROWLEY - Candy Crowley, the moderator of the second debate.  
+* QUESTION - A question asked by a member of the public.  
+* SCHIEFFER - Bob Schieffer, the moderator of the third debate.  
+
+#### Dialogue
+The quote from the person speaking.
+
+#### Turn
+Turn is used to measure the progress of time across the debate, the higher the turn number the later in the debate the quote occured. A new turn is either a new person speaking or the current speaker starting a new sentence.  
+
+## word_percentage_data
+This is the subset of *debate_data* that underlies this packages *word_usage* function. Each word from the quotes has been assigned its own row and structural words such as 'the', 'and', 'of', etc have been removed using the **tidytext** package.  Its structure is as follows:  
+
+```{r}
+require(PresidentialDebate2012)
+head(PresidentialDebate2012::word_percentage_data)
+```
+**Turn** and **word** are taken to be self evident.  
+
+#### Count
+The number of times that the *word* appears in the *turn*
+
+#### Percentage
+The percentage of all words spoken in that *turn* that are that *word*.
+
+#### Suggested usage  
+Both of the data sets have been inclued to allow you undertake your own investigations however a good use of the *word_percentage_data* is to test potential words that you can submit as parameters to the *word_usage* function.
+
+```{r}
+require(PresidentialDebate2012)
+valid_words <- PresidentialDebate2012::word_percentage_data$word
+test_word <- "economy"
+any(valid_words==test_word)
+```
+
+## word_usage function
+This function shows how the usage of given words changes across the course of the three debates by plotting word occurence percentage per turn.  
+It takes one parameter which is a character vector of words, plots will only be constructed for words that appear in *word_percentage_data* (see above).  
+For character vectors longer than 1 each word is plotted individually.  
+An example is as follows:  
+
+```{r}
+plot_words <- c("federal","security")
+PresidentialDebate2012::word_usage(plot_words)
+```
+Each point signifies that the title word was used during that turn (x-axis) and its prevalence during that turn is indicated by its occurence percentage (y-axis).  
+The vertical dotted lines signify the point at which a new debate has started.  
+A linear regression model has been used to plot a regression line which can indicate the rising/falling prevalence of the word across the 3 debates, however, the nature of the data means that overfitting can occur so we have also included the 95% confidence interval for the regression line. 
+  
+An example of overfitting can be seen in the 'federal' plot above. The word is frequently used in the 1st debate yet only a few times in the 3rd debate. Since the length of a *turn* can vary notably a few short sentences containing the word 'federal' have caused this particular plot to produce a misleading regression line.  
+Be wary of wide confidence intervals when undertaking your investigations. 
+
+# Analysis of the debates
+## Word usage across the debates
+
+
+## Term Frequency - Inverse Document Frequency Analysis
+
+```{r}
+require(tidytext)
+require(dplyr)
+require(purrr)
+require(ggplot2)
+require(ggthemes)
+
+# Breakdown dialogue into word per row
+unnested_data <- debate_data %>% tidytext::unnest_tokens(word,dialogue)
+
+# Add tf-idf columns 
+tf_idf <- unnested_data %>% 
+  count(person, word, name = "count") %>%
+  tidytext::bind_tf_idf(word, person, count)
+
+# Stop words and sort
+tfidf_unstopped <- tf_idf %>% anti_join(stop_words) %>% arrange(person,desc(tf_idf))
+
+#get top 10's & add to df
+get_top_ten <- function(p){
+  temp <- tfidf_unstopped %>% filter(person==p)
+  return(temp[1:10,])
+}
+tfidf_top_ten <- tfidf_unstopped[-(1:(nrow(tfidf_unstopped))),]
+
+tfidf_top_ten <- rbind(tfidf_top_ten,
+                       get_top_ten("CROWLEY"), 
+                       get_top_ten("OBAMA"),
+                       get_top_ten("LEHRER"),
+                       get_top_ten("QUESTION"),
+                       get_top_ten("ROMNEY"),
+                       get_top_ten("SCHIEFFER")
+                       )
+#Plot
+ggplot(tfidf_top_ten, aes(x=reorder(word, tf_idf), y=tf_idf)) +
+  geom_bar(stat = "identity")+
+  coord_flip()+
+  facet_wrap(~person, scales = "free")+
+  labs(title = "Top ten tf-idf indexed words per speaker") +
+  labs(y= "tf-idf")+
+  labs(x = " ")+
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
+
+```
+
+## Zipf's Law Analysis
+```{r}
+# Breakdown dialogue into word per row
+unnested_data <- debate_data %>% tidytext::unnest_tokens(word,dialogue)
+
+# Add tf-idf columns 
+tf_idf <- unnested_data %>% 
+  count(person, word, name = "count") %>%
+  tidytext::bind_tf_idf(word, person, count)
+
+# Add rank & log columns
+rank <- tf_idf %>% arrange(person,desc(tf)) %>%
+  group_by(person) %>%
+  mutate(rank = rank(-count,ties.method = "first")) %>%
+  filter(rank <= 500) %>%
+  mutate(log_tf = log(tf)) %>%
+  mutate(log_rank = log(rank))
+
+#plot it
+ggplot(rank, aes(x=log_rank, y=log_tf, color=person)) +
+  geom_line()
+```

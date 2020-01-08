@@ -1,0 +1,19 @@
+Package: PresidentialDebate2012
+Title: Analysis of the 2012 USA Presidential Debates
+Version: 0.0.0.9005
+Authors@R: 
+    c(person(given = "Paul",
+           family = "Hazell",
+           role = c("aut", "cre"),
+           email = "paul.hazell@postgrad.plymouth.ac.uk"),person(given="Alex", family="Brown",role="aut",email="alexzander.brown@postgrad.plymouth.ac.uk"))
+Description: Contains the words spoken during the 2012 USA Presidential Debates along with an analysis of word occurence across the debates. There were a total of three debates and each debate had it's own moderator.
+License: GPL-2 | GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.0.2
+Depends: R (>= 3.0.0)
+Imports: dplyr, ggplot2, tidytext, ggthemes, stats, utils
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

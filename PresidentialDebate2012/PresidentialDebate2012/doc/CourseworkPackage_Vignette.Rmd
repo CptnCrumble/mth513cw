@@ -1,0 +1,70 @@
+---
+title: "CourseworkPackage_Vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CourseworkPackage_Vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+author: 10556321, 10557769
+date: "08/01/2020"
+
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  fig.width=9,
+  fig.height=6
+)
+```
+
+```{r setup, echo=FALSE}
+library(PresidentialDebate2012)
+```
+
+In this package, there are three major functions:
+
+* prop_plot()
+
+* freq_plot()
+
+* zipf_plot()
+
+In this document, the use of the functions, as well as thier purpose, shall be illustrated.
+
+## prop_plot
+
+```{r prop_plot}
+#testwords<-c('word1','word2',....,'wordn')
+#prop_plot(testwords)
+```
+Here is a generic example of how to use the prop_plot function. The usage items are thus:
+
+* First create a vector of words you wish to compare using the function
+
+* Then simply call the function and between the parentheses insert the vector you have created.
+
+```{r prop_plot_example, echo=TRUE}
+require(CourseworkPackage)
+testwords<-c('jobs','military','china','people')
+print(prop_plot(testwords))
+```
+
+This produces a plot of the change in proportion of the words in the vector compared with the dialogue recorded over the course of the 2012 U.S Presidential Election debates between then-president Barack Obama and Republican nominee Mitt Romney, moderated by Jim Lehrer, Candy Crowley and Bob Schieffer, with questions from the audience.
+
+## freq_plot
+
+```{r freq_plot,echo=TRUE}
+freq_plot()
+```
+
+This command shows the 10 most frequent words used by each person throughout the course of the debates.
+
+## zipf_plot
+
+```{r zipf_plot}
+zipf_plot()
+```
+
+This command produces a plot illustrating Zipf's Law, which states that the most frequently appearing word in a set of words, be it a report or in this case a transcript, appears twice as often as the second most common, three times more than the third most common etc.
+

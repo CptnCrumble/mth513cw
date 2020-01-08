@@ -1,0 +1,16 @@
+#' Presidential Debates Data.
+#'
+#' The full, unfiltered data for the 2012 Presidential Debates. OBAMA and ROMNEY were the two presidential candidates and were present at each of the three debates. CROWLEY, LEHRER and SCHIEFFER were the moderators, each debate had a different moderator. QUESTION represents a question that has been asked by a member of the public.
+#'
+#' @format A data.frame with 2912 rows and 3 columns:
+#' \describe{
+#'  \item{person}{The surname of the person speaking.}
+#'  \item{dialogue}{Words spoken during this turn.}
+#'  \item{turn}{A new turn is considered to start when a new person starts talking or the current speaker starts a new sentence.}
+#' }
+#'
+#' @examples
+#'
+#'
+#' @source Plymouth University, 2019
+"debate_data"
